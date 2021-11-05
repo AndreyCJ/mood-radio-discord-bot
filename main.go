@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	Token string
+	CommandPrefix string = "!"
+	Token         string
+	ClientId      string
+	ChannelId     string
 )
 
 func init() {
@@ -26,6 +30,7 @@ func main() {
 		return
 	}
 
+	dg.AddHandler(botReadyHandler)
 	dg.AddHandler(chatMessageHandler)
 
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
@@ -36,7 +41,7 @@ func main() {
 		return
 	}
 
-	fmt.Println("Ready to GOOOOOOOOO")
+	fmt.Println("Bot is running!")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
@@ -45,21 +50,41 @@ func main() {
 }
 
 func chatMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	channelId := m.ChannelID
-
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	if m.Content == "!listen" {
+	userMessage := m.Content
+	userMessageBody := getUserMessageBody(userMessage)
+
+	if isCommandMessage(userMessage, "listen") {
 		const message = "Здарова нахуй!!!!!!!!!11"
-		fmt.Println("message sent => ", message)
-		s.ChannelMessageSend(channelId, message)
+		s.ChannelMessageSend(ChannelId, message)
 	}
 
-	if m.Content == "!эй" {
+	if isCommandMessage(userMessage, "эй") {
 		const message = "кок <:9716_Pepega:752249224736800778>"
-		fmt.Println("message sent => ", message)
-		s.ChannelMessageSend(channelId, message)
+		s.ChannelMessageSend(ChannelId, message)
 	}
+
+	if isCommandMessage(userMessage, "tts") && userMessageBody != "" {
+		s.ChannelMessageSendTTS(ChannelId, userMessageBody)
+	}
+}
+
+func botReadyHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	ChannelId = m.ChannelID
+}
+
+func isCommandMessage(message, command string) bool {
+	return strings.HasPrefix(message, CommandPrefix+command)
+}
+
+func getUserMessageBody(message string) string {
+	userMessageBody := strings.Split(message, " ")
+
+	if len(userMessageBody) > 1 {
+		return strings.Join(userMessageBody[1:], " ")
+	}
+	return ""
 }
