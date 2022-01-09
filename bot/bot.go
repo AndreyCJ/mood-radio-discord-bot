@@ -14,7 +14,6 @@ var ClientId string
 var ChannelId string
 
 func Start() {
-	//creating new bot session
 	goBot, err := discordgo.New("Bot " + config.Token)
 
 	if err != nil {
@@ -41,7 +40,6 @@ func Start() {
 		return
 	}
 
-	//If every thing works fine we will be printing this.
 	fmt.Println("Bot is running! :)")
 }
 
@@ -60,21 +58,25 @@ func chatMessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if isCommandMessage(userMessage, "listen") {
 		const message = "Здарова нахуй!!!!!!!!!11"
 		s.ChannelMessageSend(ChannelId, message)
+		return
 	}
 
 	if isCommandMessage(userMessage, "эй") {
 		const message = "кок <:9716_Pepega:752249224736800778>"
 		s.ChannelMessageSend(ChannelId, message)
+		return
 	}
 
 	if isCommandMessage(userMessage, "умри") {
 		const message = "покаааааааа"
 		s.ChannelMessageSend(ChannelId, message)
 		Close()
+		return
 	}
 
 	if isCommandMessage(userMessage, "tts") && userMessageBody != "" {
 		s.ChannelMessageSendTTS(ChannelId, userMessageBody)
+		return
 	}
 }
 
